@@ -10,11 +10,6 @@
 (เปิดค้างได้ 10 นาที / เปลี่ยนคำสั่งที่ ADMIN_SECRET_CMD ใน auth.py)
 ID/รหัสผ่านตั้งที่ config.py (ADMIN_USERNAME / ADMIN_PASSWORD) — ควรเปลี่ยนก่อนใช้งานจริง
 
-## ส่งอีเมลผ่าน Gmail (ไม่บังคับ)
-1. เปิด 2-Step Verification ในบัญชี Google แล้วสร้าง "App Password" 16 หลัก
-2. ก่อนรัน (Windows):  set SMTP_USER=tanakornousonean@gmail.com  และ  set SMTP_PASS=รหัส16หลัก
-ถ้าไม่ตั้งค่า ระบบจะพิมพ์ข้อความ [MAIL-DEMO] ลงหน้าจอแทนการส่งจริง
-
 ## โครงสร้างไฟล์และการเชื่อมกัน
 app.py (รันไฟล์นี้) -> config.py / database.py / auth.py / shop.py / admin.py / mailer.py + templates/ + static/
 
