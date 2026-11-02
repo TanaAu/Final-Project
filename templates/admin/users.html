@@ -1,0 +1,35 @@
+{% extends "admin/base.html" %}{% block admin %}<h2 class="sec" style="margin-top:0">ลูกค้า</h2>
+<div class="tabs"><a class="{{ 'on' if tab=='ban' }}" href="{{ url_for('admin.users', tab='ban') }}">🚫 บัญชีลูกค้า / แบน</a>
+ <a class="{{ 'on' if tab=='ship' }}" href="{{ url_for('admin.users', tab='ship') }}">🚚 อัปเดตการจัดส่ง{% if pending_ship %}<small>{{ pending_ship }} รอจัดส่ง</small>{% endif %}</a></div>
+
+{% if tab=='ban' %}
+<div class="tablewrap"><table><tr><th>ชื่อผู้ใช้</th><th>อีเมล / ชื่อ</th><th>คำสั่งซื้อ</th><th>ยอดซื้อ (อนุมัติแล้ว)</th><th>สถานะ</th><th></th></tr>
+{% for u in rows %}<tr><td>{{ u.username }}</td><td>{{ u.email }}<br><span class="mut">{{ u.full_name }}</span></td><td>{{ u.n }}</td><td>฿{{ u.spent|baht }}</td>
+ <td>{% if u.banned %}<span class="badge-s rejected">ถูกแบน</span><br><small class="warn">{{ u.ban_reason }}</small><br><small class="mut">{{ u.banned_at|thai_dt }}</small>{% else %}<span class="badge-s">ปกติ</span>{% endif %}</td>
+ <td><div class="row"><a class="btn ghost" href="{{ url_for('admin.user_detail', uid=u.id) }}">ดูรายการที่ซื้อ</a>
+  {% if u.banned %}<form method="post" action="{{ url_for('admin.user_unban', uid=u.id) }}" onsubmit="return confirm('ปลดแบน {{ u.username }}?')"><button class="btn ac">ปลดแบน</button></form>
+  {% else %}<details class="banbox"><summary class="btn red">แบน</summary>
+   <form method="post" action="{{ url_for('admin.user_ban', uid=u.id) }}" onsubmit="return confirm('แบน {{ u.username }}? เขาจะเข้าสู่ระบบไม่ได้ทันที')">
+    <label style="margin-top:0">เลือกสาเหตุที่แบน *</label>
+    <select name="reason_id" required><option value="">— เลือกสาเหตุ —</option>{% for r in reasons %}<option value="{{ r.id }}">{{ r.reason }}</option>{% endfor %}</select>
+    <label>รายละเอียดเพิ่มเติม (ไม่บังคับ)</label><input name="note" maxlength="200">
+    <button class="btn red" style="margin-top:10px">ยืนยันแบน</button></form></details>{% endif %}</div></td></tr>
+{% else %}<tr><td colspan="6" class="mut">ยังไม่มีลูกค้าสมัคร</td></tr>{% endfor %}</table></div>
+
+<h3 id="reasons" style="margin-top:28px">สาเหตุการแบน <small class="mut" style="font-weight:400">— เพิ่มสาเหตุใหม่ได้ตลอด จะไปปรากฏในรายการเลือกด้านบน</small></h3>
+<form method="post" action="{{ url_for('admin.ban_reason_add') }}" class="row" style="margin-bottom:12px"><input name="reason" maxlength="100" placeholder="พิมพ์สาเหตุใหม่ เช่น รีวิวหลอกลวง" style="max-width:380px" required><button class="btn ac">+ เพิ่มสาเหตุ</button></form>
+<ul class="reasons">{% for r in reasons %}<li>{{ r.reason }}<form method="post" action="{{ url_for('admin.ban_reason_delete', rid=r.id) }}" onsubmit="return confirm('ลบสาเหตุนี้ออกจากรายการ?')"><button class="x" aria-label="ลบสาเหตุ">✕</button></form></li>{% else %}<li class="mut">ยังไม่มีสาเหตุ</li>{% endfor %}</ul>
+
+{% else %}
+<div class="tabs"><a class="{{ 'on' if flt=='active' }}" href="{{ url_for('admin.users', tab='ship', ship='active') }}">กำลังดำเนินการ</a><a class="{{ 'on' if flt=='done' }}" href="{{ url_for('admin.users', tab='ship', ship='done') }}">จัดส่งสำเร็จ</a><a class="{{ 'on' if flt=='all' }}" href="{{ url_for('admin.users', tab='ship', ship='all') }}">ทั้งหมด</a></div>
+<p class="mut" style="margin-top:0">แสดงเฉพาะคำสั่งซื้อที่อนุมัติการชำระเงินแล้ว — เมื่ออัปเดต ลูกค้าจะเห็นที่หน้า "คำสั่งซื้อของฉัน" ทันที (อัปเดตอัตโนมัติ ไม่ต้องรีเฟรช)</p>
+{% for o in rows %}<article class="order"><header><div><b>คำสั่งซื้อ #{{ o.user_order_no }}</b> · {{ o.username }} <span class="mut">(รหัสระบบ {{ o.id }})</span><br>
+ <span class="mut">{{ o.ship_name or '-' }} · {{ o.ship_phone or '' }} · {{ o.ship_address or '' }}</span></div><a class="btn ghost" href="{{ url_for('admin.order_detail', oid=o.id) }}">รายละเอียด</a></header>
+ <ol class="steps">{% for n, lb in SHIP_STEPS.items() %}<li class="{{ 'done' if o.ship_step >= n }} {{ 'now' if o.ship_step == n }}"><span>{{ n }}</span>{{ lb }}</li>{% endfor %}</ol>
+ {% if ev[o.id] %}<ul class="elog">{% for e in ev[o.id] %}<li><b>{{ SHIP_STEPS[e.step] }}</b>{% if e.note %} — {{ e.note }}{% endif %}<small>{{ e.created_at|thai_dt }}</small></li>{% endfor %}</ul>{% endif %}
+ {% if o.ship_step < 3 %}<form method="post" action="{{ url_for('admin.order_ship', oid=o.id) }}" class="shipform"><input type="hidden" name="flt" value="{{ flt }}">
+  <input name="note" maxlength="200" placeholder="ข้อความถึงลูกค้า (ไม่บังคับ) เช่น ขนส่ง / เลขพัสดุ">
+  <button name="action" value="advance" class="btn ac">อัปเดตเป็น “{{ SHIP_STEPS[o.ship_step + 1] }}”</button>
+  {% if o.ship_step >= 1 %}<button name="action" value="note" class="btn ghost">เพิ่มข้อความเท่านั้น</button>{% endif %}</form>{% endif %}</article>
+{% else %}<p class="mut">ไม่มีคำสั่งซื้อในหมวดนี้</p>{% endfor %}
+{% endif %}{% endblock %}

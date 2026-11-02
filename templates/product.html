@@ -1,0 +1,14 @@
+{% extends "base.html" %}{% block content %}{% set img = p.image or p.color_img %}
+<div class="detail"><div class="card pcard"><div class="img" style="margin:10px"><img id="pimg" {% if img %}src="{{ img }}"{% else %}hidden{% endif %} alt="{{ p.name }}"></div></div>
+<div><p class="mut">{{ p.brand }} · {{ p.category }}</p><h1 style="margin:0">{{ p.name }}</h1>
+<p class="price" style="font-size:30px">฿{{ p.price|incl_vat|money }}</p>
+{% if colors %}
+<form method="post" action="{{ url_for('shop.cart_add', pid=p.id) }}">
+ <fieldset class="colors"><legend>เลือกสี</legend>
+ {% for c in colors %}<label class="chip {{ 'out' if c.stock<=0 }}"><input type="radio" name="cid" value="{{ c.id }}" data-img="{{ c.image }}" data-stock="{{ c.stock }}" {{ 'checked' if c.id==default_cid }} {{ 'disabled' if c.stock<=0 }}><span>{{ c.color }}</span><small>{{ 'หมด' if c.stock<=0 else 'เหลือ ' ~ c.stock }}</small></label>{% endfor %}</fieldset>
+ <p class="mut" id="pstock"></p><p>{{ p.description }}</p>
+ <button class="btn ac" {% if p.total_stock<=0 %}disabled{% endif %}>ใส่ตะกร้า</button></form>
+{% else %}
+<p>สี: {{ p.color or '-' }}<br>คงเหลือ: {{ p.stock }} ชิ้น</p><p>{{ p.description }}</p>
+<form method="post" action="{{ url_for('shop.cart_add', pid=p.id) }}"><button class="btn ac" {% if p.stock<=0 %}disabled{% endif %}>ใส่ตะกร้า</button></form>
+{% endif %}</div></div>{% endblock %}

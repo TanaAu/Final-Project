@@ -1,0 +1,30 @@
+{# โครงหน้า ADMIN: เมนูหลังบ้านแบ่งกลุ่ม (ระบบขายของ / ระบบแต่งเว็บ / ข้อมูลรายได้ / บัญชี) สืบทอดจาก base.html #}
+{% extends "base.html" %}
+{% macro nav(label, ep, also=[]) %}<a class="adm-link {{ 'on' if request.endpoint == ep or request.endpoint in also }}" href="{{ url_for(ep) }}">{{ label }}</a>{% endmacro %}
+{% block content %}
+<div class="adm">
+ <aside class="adm-nav">
+  <a class="adm-home {{ 'on' if request.endpoint == 'admin.dashboard' }}" href="{{ url_for('admin.dashboard') }}">📊 ภาพรวม</a>
+
+  <div class="adm-grp"><h4>🛒 ระบบขายของ</h4>
+   {{ nav('จัดการสินค้า', 'admin.products', ['admin.product_form']) }}
+   
+   <a class="adm-link {{ 'on' if request.endpoint in ('admin.orders','admin.order_detail') }}" href="{{ url_for('admin.orders') }}">คำสั่งซื้อ / ตรวจสลิป{% if pending_count %}<span class="nav-n">{{ pending_count }}</span>{% endif %}</a>
+   {{ nav('ช่องทางชำระเงิน ', 'admin.payment') }}
+   <a class="adm-link {{ 'on' if request.endpoint in ('admin.users','admin.user_detail') }}" href="{{ url_for('admin.users') }}">ลูกค้า </a>
+  </div>
+
+  <div class="adm-grp"><h4>🎨 ระบบแต่งเว็บ</h4>
+   {{ nav('แบนเนอร์', 'admin.banners', ['admin.banner_form']) }}
+   {{ nav('วิดเจ็ตหน้าแรก', 'admin.widgets', ['admin.widget_form']) }}
+   {{ nav('คอมเมนต์หน้าแรก', 'admin.comments') }}
+  </div>
+
+  <div class="adm-grp"><h4>💰 ข้อมูลรายได้</h4>
+   {{ nav('รายได้', 'admin.sales') }}
+  </div>
+
+  
+ </aside>
+ <section class="adm-main">{% block admin %}{% endblock %}</section>
+</div>{% endblock %}

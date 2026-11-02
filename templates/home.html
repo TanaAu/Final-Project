@@ -1,0 +1,51 @@
+{% extends "base.html" %}{% from "_card.html" import card %}
+{# หน้าแรก: แบนเนอร์ (ADMIN แก้ได้) -> Our Collections -> สินค้าล่าสุด -> วิดเจ็ต (ADMIN เพิ่มได้) -> คอมเมนต์ลูกค้า (ล่างสุด) #}
+{% block hero %}
+<section class="carousel"><div class="track">
+ {% for b in banners %}
+  <div class="slide" style="--ov:{{ b.color }};{% if b.image %}--img:url('{{ b.image }}'){% endif %}"><div>
+    <h1>{{ b.title }}{% if b.subtitle %}<span>{{ b.subtitle }}</span>{% endif %}</h1>
+    {% if b.button_text and b.button_link %}<a class="go" href="{{ b.button_link }}">{{ b.button_text }}</a>{% endif %}</div></div>
+ {% else %}<div class="slide"><h1>Aor-Au<span>Smart Watch</span></h1></div>{% endfor %}
+</div>{% if banners|length > 1 %}<div class="dots">{% for b in banners %}<i></i>{% endfor %}</div>{% endif %}</section>
+{% endblock %}
+{% block content %}
+<div class="head"><h2 class="sec">Our Collections</h2><a class="btn ghost" href="{{ url_for('shop.products') }}">ดูทั้งหมด</a></div>
+<div class="svc">{% for c in cats %}
+ <a class="svc-row" href="{{ url_for('shop.products', cat=c.category) }}"><span class="num">{{ '%02d'|format(loop.index) }}.</span>
+  <div class="svc-img">{% if c.image %}<img src="{{ c.image }}" alt="">{% endif %}</div>
+  <div><h3>{{ c.category }}</h3><p class="mut">{{ c.n }} รายการ — กดเพื่อดูสินค้าในหมวดนี้</p></div><span class="btn ghost">Show more</span></a>
+{% endfor %}</div>
+<h2 class="sec">สินค้าล่าสุด</h2>
+<div class="grid">{% for p in items %}{{ card(p) }}{% else %}<p class="mut">ยังไม่มีสินค้า</p>{% endfor %}</div>
+{% if widgets %}<div class="wgrid">{% for w in widgets %}
+ <div class="wg {{ w.kind }} {{ 'full' if w.size=='full' }}">
+  {% if w.kind=='quote' %}<blockquote>“{{ w.body }}”<cite>{{ w.title }}</cite></blockquote>
+  {% else %}{% if w.image %}<img src="{{ w.image }}" alt="">{% endif %}
+   <div class="wb">{% if w.title %}<h3>{{ w.title }}</h3>{% endif %}{% if w.body %}<p>{{ w.body }}</p>{% endif %}
+   {% if w.link and w.link_text %}<a class="btn {{ 'ac' if w.kind=='highlight' else 'ghost' }}" href="{{ w.link }}">{{ w.link_text }}</a>{% endif %}</div>{% endif %}
+ </div>{% endfor %}</div>{% endif %}
+
+{# ===== คอมเมนต์ลูกค้า: ส่วนล่างสุดของหน้าแรก ===== #}
+<section id="comments" class="cmt">
+ <div class="head"><h2 class="sec">คอมเมนต์จากลูกค้า</h2><span class="mut">{{ comments|length }} ความคิดเห็นล่าสุด{% if g.user and g.user.is_admin %} · <a href="{{ url_for('admin.comments') }}"><u>จัดการ / เพิ่มคอมเมนต์</u></a>{% endif %}</span></div>
+ {% if g.user and not g.user.is_admin %}
+ <form method="post" action="{{ url_for('shop.comment_add') }}" class="cmt-form">
+  {% if g.user.avatar %}<img class="avatar sm" src="{{ g.user.avatar }}" alt="">{% else %}<div class="avatar sm">{{ (g.user.full_name or g.user.username)[:1]|upper }}</div>{% endif %}
+  <div style="flex:1"><textarea name="body" rows="3" maxlength="500" required placeholder="แบ่งปันความรู้สึกหลังใช้บริการ หรือสินค้าที่ซื้อ…"></textarea>
+   <div class="row" style="justify-content:space-between;margin-top:8px"><small class="mut">ไม่เกิน 500 ตัวอักษร</small><button class="btn ac">ส่งคอมเมนต์</button></div></div>
+ </form>
+ {% elif not g.user %}
+ <p class="cmt-login mut"><a href="{{ url_for('auth.login', next='/') }}"><u>เข้าสู่ระบบ</u></a> หรือ <a href="{{ url_for('auth.register') }}"><u>สมัครสมาชิก</u></a> เพื่อเขียนคอมเมนต์</p>
+ {% endif %}
+ <div class="cmt-list">{% for c in comments %}
+  <article class="cmt-item">
+   {% set nm = c.author or c.full_name or c.username %}
+   {% if c.avatar and not c.author %}<img class="avatar sm" src="{{ c.avatar }}" alt="">{% else %}<div class="avatar sm">{{ nm[:1]|upper }}</div>{% endif %}
+   <div style="flex:1;min-width:0"><div class="row" style="justify-content:space-between;gap:8px"><b>{{ nm }}{% if c.is_admin and not c.author %} <span class="tag">ร้านค้า</span>{% endif %}</b><small class="mut">{{ c.created_at|thai_dt }}</small></div>
+    <p class="cmt-body">{{ c.body }}</p>
+    {% if g.user and (g.user.id == c.user_id or g.user.is_admin) %}<form method="post" action="{{ url_for('shop.comment_delete', cid=c.id) }}" onsubmit="return confirm('ลบคอมเมนต์นี้?')"><button class="cmt-del">ลบ</button></form>{% endif %}</div>
+  </article>
+ {% else %}<p class="mut">ยังไม่มีคอมเมนต์ — มาเป็นคนแรกที่แบ่งปันความรู้สึกกัน</p>{% endfor %}</div>
+</section>
+{% endblock %}

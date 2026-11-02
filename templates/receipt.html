@@ -1,0 +1,75 @@
+<!doctype html><html lang="th"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ใบเสร็จ #{{ '%06d'|format(o.id) }} — Aor-Au Smart Watch</title>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#0f1420;--mut:#667085;--line:#e4e7ee}
+*{box-sizing:border-box}
+body{margin:0;background:#eef0f6;font-family:Prompt,"Noto Sans Thai",Tahoma,sans-serif;color:var(--ink);font-size:14px;line-height:1.5}
+.toolbar{max-width:794px;margin:18px auto 0;padding:0 12px;display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+.toolbar a,.toolbar button{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:9px 18px;border-radius:99px;cursor:pointer;text-decoration:none}
+.toolbar .pri{background:#2f4bff;border-color:#2f4bff;color:#fff}
+.paper{max-width:794px;margin:14px auto 40px;background:#fff;border:1px solid var(--line);border-radius:6px;padding:40px 44px}
+.top{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;border-bottom:2px solid var(--ink);padding-bottom:16px}
+.shop{font-size:24px;font-weight:600;line-height:1.1}.shop small{display:block;font-weight:300;font-size:12px;color:var(--mut);margin-top:4px}
+.doc{text-align:right}.doc h1{margin:0;font-size:22px;font-weight:600}
+.meta{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:20px 0}
+.meta h3{margin:0 0 4px;font-size:12px;color:var(--mut);font-weight:500;text-transform:uppercase;letter-spacing:.04em}
+.meta p{margin:0}
+table{width:100%;border-collapse:collapse;margin-top:6px}
+th{background:#f6f7fb;text-align:left;font-weight:500;padding:9px 10px;border-bottom:1px solid var(--line);font-size:13px}
+td{padding:10px;border-bottom:1px solid var(--line);vertical-align:top}
+.r{text-align:right}.c{text-align:center}.mut{color:var(--mut)}
+.sum{margin-left:auto;width:min(300px,100%);margin-top:14px}
+.sum div{display:flex;justify-content:space-between;padding:4px 10px}
+.sum .grand{border-top:2px solid var(--ink);margin-top:6px;padding-top:10px;font-size:18px;font-weight:600}
+.paid{display:inline-block;margin-top:16px;border:2px solid #17803d;color:#17803d;border-radius:6px;padding:2px 14px;font-weight:600;transform:rotate(-3deg)}
+.foot{margin-top:30px;padding-top:14px;border-top:1px dashed var(--line);text-align:center;color:var(--mut);font-size:12px}
+@media(max-width:600px){.paper{padding:22px 16px}.meta{grid-template-columns:1fr}.top{flex-direction:column}.doc{text-align:left}}
+/* ===== ตอนพิมพ์: ซ่อนปุ่ม ใช้กระดาษ A4 เต็มหน้า ===== */
+@page{size:A4;margin:12mm}
+@media print{
+  body{background:#fff;font-size:12.5px}
+  .toolbar{display:none!important}
+  .paper{border:0;border-radius:0;margin:0;max-width:none;padding:0;box-shadow:none}
+  tr{page-break-inside:avoid}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style></head><body>
+<div class="toolbar">
+  <a href="{{ url_for('shop.orders') if not g.user.is_admin else url_for('admin.orders') }}">← กลับ</a>
+  <button class="pri" onclick="window.print()">🖨 พิมพ์ใบเสร็จ</button>
+</div>
+<div class="paper">
+  <div class="top">
+    <div class="shop">Aor-Au <small>Smart Watch · Online Store</small></div>
+    <div class="doc"><h1>ใบเสร็จรับเงิน</h1><div class="mut">Receipt</div>
+      <div>เลขที่ <b>RC{{ '%06d'|format(o.id) }}</b></div>
+      <div>วันที่ {{ o.created_at|thai_dt }}</div></div>
+  </div>
+
+  <div class="meta">
+    <div><h3>ลูกค้า</h3><p><b>{{ o.ship_name or '-' }}</b><br>โทร {{ o.ship_phone or '-' }}<br>{{ o.ship_email or '' }}</p></div>
+    <div><h3>ที่อยู่จัดส่ง</h3><p>{{ o.ship_address or '-' }}</p></div>
+    <div><h3>คำสั่งซื้อ</h3><p>#{{ o.user_order_no }}</p></div>
+    <div><h3>การชำระเงิน</h3><p>โอนเงินผ่าน QR{% if o.slip %} · แนบสลิปแล้ว{% endif %}</p></div>
+  </div>
+
+  <table>
+    <tr><th class="c" style="width:40px">#</th><th>รายการสินค้า</th><th class="r" style="width:90px">ราคา/ชิ้น</th><th class="c" style="width:60px">จำนวน</th><th class="r" style="width:100px">รวม</th></tr>
+    {% for i in items %}<tr>
+      <td class="c">{{ loop.index }}</td>
+      <td><b>{{ i.name }}</b>{% if i.brand or i.color %}<br><span class="mut">{{ i.brand or '' }}{% if i.brand and i.color %} · {% endif %}{% if i.color %}สี {{ i.color }}{% endif %}</span>{% endif %}</td>
+      <td class="r">฿{{ i.price|baht }}</td><td class="c">{{ i.qty }}</td><td class="r">฿{{ (i.price*i.qty)|baht }}</td></tr>
+    {% endfor %}
+  </table>
+
+  <div class="sum">
+    <div><span class="mut">จำนวนสินค้า</span><span>{{ items|sum(attribute='qty') }} ชิ้น</span></div>
+    <div class="grand"><span>ยอดชำระทั้งสิ้น</span><span>฿{{ o.total|money }}</span></div>
+  </div>
+  {% if o.status=='paid' %}<div class="paid">ชำระเงินแล้ว</div>{% else %}<div class="paid" style="border-color:#9a6700;color:#9a6700">{{ o.status|status_th }} (ยังไม่ใช่ใบเสร็จจริง)</div>{% endif %}
+
+  <div class="foot">ขอบคุณที่ใช้บริการ Aor-Au Smart Watch · contact@ thanakorn.us@kkumail<br>เอกสารนี้ออกโดยระบบอัตโนมัติ</div>
+</div>
+</body></html>

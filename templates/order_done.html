@@ -1,0 +1,7 @@
+{% extends "base.html" %}{% block content %}<div class="box" style="text-align:center"><h2>ส่งสลิปเรียบร้อย — รอร้านตรวจสอบ</h2>
+{% if o.status=='paid' %}<p>คำสั่งซื้อ #{{ o.user_order_no }} — ร้านอนุมัติการชำระเงินแล้ว</p>
+{% elif o.status=='rejected' %}<p>คำสั่งซื้อ #{{ o.user_order_no }} — ไม่ผ่านการตรวจสอบ: {{ o.reject_reason }}</p>
+{% else %}<p>คำสั่งซื้อ #{{ o.user_order_no }} —ร้านได้รับออเดอร์แล้ว และกำลังตรวจสอบสลิปของท่าน<br><span class="mut">เมื่อตรวจสอบเสร็จ คุณจะพิมพ์ใบเสร็จได้ที่หน้า "คำสั่งซื้อของฉัน"</span></p>{% endif %}
+<p class="row" style="justify-content:center">
+{% if o.status=='paid' %}<a class="btn ac" href="{{ url_for('shop.receipt', oid=o.id) }}" target="_blank" rel="noopener">🖨 ดู / พิมพ์ใบเสร็จ</a>{% endif %}
+<a class="btn ghost" href="{{ url_for('shop.orders') }}">ดูคำสั่งซื้อของฉัน</a></p></div>{% endblock %}

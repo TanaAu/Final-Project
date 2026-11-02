@@ -1,0 +1,7 @@
+.env
+shop.db
+slips/
+__pycache__/
+*.pyc
+static/uploads/qr_*
+static/uploads/avatar_*

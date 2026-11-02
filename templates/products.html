@@ -1,0 +1,10 @@
+{% extends "base.html" %}{% from "_card.html" import card %}
+{% block content %}<div class="layout">
+<aside class="filters card" style="padding:16px;align-self:start"><b>ตัวกรอง</b>
+ <form><input name="q" value="{{ q }}" placeholder="ค้นหา" data-suggest autocomplete="off">
+  <select name="cat"><option value="">ทุกหมวดหมู่</option>{% for c in cats %}<option {{ 'selected' if c==cat }}>{{ c }}</option>{% endfor %}</select>
+  <select name="brand"><option value="">ทุกแบรนด์</option>{% for b in brands %}<option {{ 'selected' if b==brand }}>{{ b }}</option>{% endfor %}</select>
+  <input name="min" type="number" placeholder="ราคาต่ำสุด" value="{{ request.args.get('min','') }}"><input name="max" type="number" placeholder="ราคาสูงสุด" value="{{ request.args.get('max','') }}">
+  <button class="btn">กรอง</button></form></aside>
+<section><h2 class="sec" style="margin-top:0">{{ cat or 'All Smart Watch' }} <span class="mut" style="font-size:16px">({{ items|length }})</span></h2>
+<div class="grid">{% for p in items %}{{ card(p) }}{% else %}<p class="mut">ไม่พบสินค้า ลองเปลี่ยนคำค้นหา</p>{% endfor %}</div></section></div>{% endblock %}

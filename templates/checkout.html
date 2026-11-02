@@ -1,0 +1,18 @@
+{% extends "base.html" %}{% block content %}<h2 class="sec">ตรวจสอบคำสั่งซื้อ</h2>
+<p class="mut">ขั้นตอน 1/2 — ตรวจสอบสินค้าและที่อยู่จัดส่งให้ถูกต้อง แล้วกดตกลงจึงจะไปหน้าชำระเงินได้</p>
+<div class="co">
+<section><h3>รายการสินค้า</h3>
+{% for i in rows %}<div class="line">{% if i.image %}<img class="thumb" src="{{ i.image }}" alt="">{% else %}<span class="thumb"></span>{% endif %}
+ <div style="flex:1"><b>{{ i.p.name }}</b><br><span class="mut">{{ i.p.brand }}{% if i.color %} · สี {{ i.color }}{% endif %} · {{ i.p.category }}</span><br><span class="mut">฿{{ i.price|baht }} (ก่อน VAT) × {{ i.qty }} ชิ้น</span></div><b>฿{{ i.sub|baht }}</b></div>{% endfor %}
+<div class="line"><span style="flex:1">รวมก่อน VAT</span><b>฿{{ total|money }}</b></div>
+<div class="line"><span style="flex:1">ภาษีมูลค่าเพิ่ม (VAT) {{ VAT_PERCENT }}%</span><b>฿{{ vat|money }}</b></div>
+<div class="line"><span style="flex:1">ยอดรวมที่ต้องชำระ (รวม VAT)</span><b class="price">฿{{ grand|money }}</b></div>
+<a class="btn ghost" href="{{ url_for('shop.cart') }}">กลับไปแก้ไขตะกร้า</a></section>
+<aside><h3>ข้อมูลลูกค้าและที่อยู่จัดส่ง</h3>
+<dl class="info"><dt>ชื่อ-นามสกุล</dt><dd>{{ g.user.full_name or '— ยังไม่ได้กรอก —' }}</dd><dt>เบอร์โทร</dt><dd>{{ g.user.phone or '— ยังไม่ได้กรอก —' }}</dd>
+<dt>อีเมล (รับใบเสร็จ)</dt><dd>{{ g.user.email }}</dd><dt>ที่อยู่จัดส่ง</dt><dd>{{ g.user.address or '— ยังไม่ได้กรอก —' }}</dd></dl>
+<a class="btn ghost" href="{{ url_for('shop.profile', edit=1, next='/checkout') }}">แก้ไขข้อมูล</a>
+<form method="post" style="margin-top:18px">
+ <label style="color:var(--ink)"><input type="checkbox" name="agree" style="width:auto" required {{ '' if ok else 'disabled' }}> ฉันตรวจสอบสินค้าและที่อยู่แล้ว ข้อมูลถูกต้อง</label>
+ {% if not ok %}<p class="warn">กรุณากรอกชื่อ เบอร์โทร และที่อยู่ให้ครบก่อน</p>{% endif %}
+ <p><button class="btn ac" {{ '' if ok else 'disabled' }}>ตกลง ไปชำระเงิน</button></p></form></aside></div>{% endblock %}

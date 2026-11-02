@@ -1,0 +1,13 @@
+{% extends "base.html" %}{% block content %}<h2 class="sec">คำสั่งซื้อของฉัน </h2>
+{% for o,items in data %}<article class="order">
+ <header><div><b>คำสั่งซื้อ #{{ o.user_order_no }}</b><br><span class="mut">{{ o.created_at|thai_dt }} · </span></div>
+ <span class="badge-s {{ o.status }}">{{ o.status|status_th }}</span></header>
+ {% if o.status=='pending' %}<p class="mut" style="margin:8px 0 0">ร้านได้รับสลิปแล้ว กำลังตรวจสอบการชำระเงิน </p>
+ {% elif o.status=='rejected' %}<p style="margin:8px 0 0;color:#c62828"><b>เหตุผล:</b> {{ o.reject_reason or '-' }} <span class="mut">— หากโอนเงินแล้ว กรุณาติดต่อร้านพร้อมหลักฐานการโอน</span></p>{% endif %}
+ {% if o.status=='paid' %}{% with events=ev[o.id] %}{% include "_tracking.html" %}{% endwith %}{% endif %}
+ {% for i in items %}<div class="line">{% if i.img %}<img class="thumb" src="{{ i.img }}" alt="">{% else %}<span class="thumb"></span>{% endif %}
+  <div style="flex:1"><b>{{ i.name }}</b><br><span class="mut">{{ i.brand or '' }}{% if i.color %} · สี {{ i.color }}{% endif %}</span><br><span class="mut">฿{{ (i.price*(1+o.vat_rate))|money }} × {{ i.qty }} ชิ้น</span></div><b>฿{{ (i.price*i.qty*(1+o.vat_rate))|money }}</b></div>{% endfor %}
+ <footer><div class="mut"><b style="color:var(--ink)">จัดส่งถึง</b> {{ o.ship_name or '-' }} · {{ o.ship_phone or '' }}<br>{{ o.ship_address or '' }}</div>
+  <div style="text-align:right"><span class="mut">รวม {{ items|sum(attribute='qty') }} ชิ้น</span><br><b class="price">฿{{ o.total|money }}</b>
+   <div class="row" style="justify-content:flex-end;margin-top:8px">{% if o.status=='paid' %}<a class="btn ac" href="{{ url_for('shop.receipt', oid=o.id) }}" target="_blank" rel="noopener">🖨 ใบเสร็จ</a>{% endif %}{% if o.slip %}<a class="btn ghost" href="{{ url_for('shop.order_slip', oid=o.id) }}" target="_blank" rel="noopener">ดูสลิป</a>{% endif %}</div></div></footer></article>
+{% else %}<p class="mut">ยังไม่เคยซื้อสินค้า — <a href="{{ url_for('shop.products') }}"><u>เลือกซื้อสินค้า</u></a></p>{% endfor %}{% endblock %}

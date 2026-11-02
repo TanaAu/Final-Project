@@ -1,0 +1,6 @@
+{# ติดตามการจัดส่ง 1 ออเดอร์ (ใช้ใน orders.html และถูกดึงไปแทนที่เองทุก 5 วินาทีเมื่อมีอัปเดต ผ่าน /order/<id>/tracking) #}
+<div class="ship" data-oid="{{ o.id }}" data-sig="{{ o.ship_step }}:{{ events|length }}">
+ <ol class="steps">{% for n, lb in SHIP_STEPS.items() %}<li class="{{ 'done' if o.ship_step >= n }} {{ 'now' if o.ship_step == n }}"><span>{{ n }}</span>{{ lb }}</li>{% endfor %}</ol>
+ {% if o.ship_step == 0 %}<p class="mut" style="margin:6px 0 0">รอร้านรับ Order เข้าสู่ขั้นตอนจัดส่ง</p>{% endif %}
+ {% if events %}<ul class="elog">{% for e in events %}<li><b>{{ SHIP_STEPS[e.step] }}</b>{% if e.note %} — {{ e.note }}{% endif %}<small>{{ e.created_at|thai_dt }}</small></li>{% endfor %}</ul>{% endif %}
+</div>

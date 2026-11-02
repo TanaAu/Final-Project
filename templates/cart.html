@@ -1,0 +1,12 @@
+{% extends "base.html" %}{% block content %}<h2 class="sec">ตะกร้าสินค้า</h2>
+{% if rows %}<div class="tablewrap"><table><tr><th>สินค้า</th><th>ราคา</th><th>จำนวน</th><th>รวม</th><th></th></tr>
+{% for i in rows %}<tr><td class="row">{% if i.image %}<img class="thumb" src="{{ i.image }}" alt="">{% else %}<span class="thumb"></span>{% endif %}
+<span><b>{{ i.p.name }}</b>{% if i.color %}<br><small class="mut">สี {{ i.color }}</small>{% endif %}{% if i.qty > i.stock %}<br><small class="warn">เกินสต็อก เหลือ {{ i.stock }} ชิ้น กรุณาลดจำนวน</small>{% endif %}</span></td>
+<td>฿{{ i.price|incl_vat|money }}</td>
+<td><form method="post" action="{{ url_for('shop.cart_update', key=i.key) }}" class="row"><input type="number" name="qty" value="{{ i.qty }}" min="1" max="{{ i.stock }}" style="width:76px"><button class="btn ghost">อัปเดต</button><small class="mut">เหลือ {{ i.stock }} ชิ้น</small></form></td>
+<td>฿{{ i.sub|incl_vat|money }}</td>
+<td><form method="post" action="{{ url_for('shop.cart_remove', key=i.key) }}"><button class="btn red">ยกเลิกสินค้า</button></form></td></tr>{% endfor %}</table></div>
+<div class="row" style="justify-content:space-between;margin-top:14px">
+<form method="post" action="{{ url_for('shop.cart_clear') }}" onsubmit="return confirm('ล้างตะกร้าทั้งหมด?')"><button class="btn ghost">ล้างตะกร้าทั้งหมด</button></form>
+<div style="text-align:right"><p class="price" style="margin:0 0 8px">รวมทั้งหมด ฿{{ grand|money }}</p><a class="btn ac" href="{{ url_for('shop.checkout') }}">ไปหน้าตรวจสอบและชำระเงิน</a></div></div>
+{% else %}<p class="mut">ตะกร้ายังว่าง — <a href="{{ url_for('shop.products') }}"><u>เลือกซื้อสินค้า</u></a></p>{% endif %}{% endblock %}

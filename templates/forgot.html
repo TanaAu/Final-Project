@@ -1,0 +1,5 @@
+{% extends "base.html" %}{% block content %}<form class="box" method="post"><h2>ลืมรหัสผ่าน</h2>
+<p class="mut">กรอกอีเมล (Gmail) และเบอร์โทรที่ใช้สมัคร ถ้าตรงกันจะตั้งรหัสผ่านใหม่ได้</p>
+<label>อีเมล (Gmail)</label><input name="email" type="email" required>
+<label>เบอร์โทร</label><input name="phone" required inputmode="numeric" pattern="[0-9]{9,10}" maxlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')" title="ตัวเลข 9-10 หลักเท่านั้น">
+<p class="row"><button class="btn ac">ตรวจสอบ</button><a class="btn ghost" href="{{ url_for('auth.login') }}">กลับไปเข้าสู่ระบบ</a></p></form>{% endblock %}

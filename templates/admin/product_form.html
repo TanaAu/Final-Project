@@ -1,0 +1,34 @@
+{% extends "admin/base.html" %}{% block admin %}
+<form class="box wide" method="post" enctype="multipart/form-data"><h2>{{ 'แก้ไขสินค้า' if p else 'เพิ่มสินค้าใหม่' }}</h2>
+<label>ชื่อสินค้า (รุ่น)</label><input name="name" value="{{ p.name if p }}" required>
+<label>แบรนด์</label><input name="brand" value="{{ p.brand if p }}">
+<label>หมวดหมู่ (เลือกจากรายการ)</label>
+<select name="category">{% for c in cats %}<option {{ 'selected' if p and p.category==c }}>{{ c }}</option>{% endfor %}
+ {% if p and p.category not in cats %}<option selected>{{ p.category }}</option>{% endif %}</select>
+<label>หรือพิมพ์ชื่อหมวดหมู่ใหม่ (จะสร้างหมวดใหม่ให้อัตโนมัติ)</label><input name="new_category" placeholder="เช่น Kids Watch">
+<label>ราคาก่อน VAT (บาท) — ลูกค้าจะเห็นราคารวม VAT {{ VAT_PERCENT }}% ให้อัตโนมัติ</label><input name="price" type="number" step="0.01" min="0" value="{{ p.price if p }}" required>
+<label>รายละเอียด</label><textarea name="description" rows="4">{{ p.description if p }}</textarea>
+<label>รูปหลักของสินค้า — อัปโหลดไฟล์</label><input type="file" name="image_file" accept="image/*">
+<label>หรือลิงก์รูป (URL)</label><input name="image_url" value="{{ p.image if p and p.image.startswith('http') }}">
+
+<h3 style="margin-bottom:0">สี / ตัวเลือก</h3>
+<p class="mut" style="margin:2px 0 10px">ถ้านาฬิการุ่นนี้มีหลายสี ให้กด "เพิ่มสี" แล้วกรอกชื่อสี สต็อก และรูปของสีนั้น (ลูกค้าจะเลือกสีก่อนใส่ตะกร้า) ถ้าสินค้ามีสีเดียว ไม่ต้องเพิ่ม ใช้ช่องด้านล่างแทน</p>
+<div id="color-rows">
+ {% for c in colors %}<div class="color-row"><input type="hidden" name="color_id" value="{{ c.id }}">
+  <input name="color_name" value="{{ c.color }}" placeholder="ชื่อสี" required>
+  <input name="color_stock" type="number" min="0" value="{{ c.stock }}" title="สต็อกของสีนี้">
+  <input name="color_image_url" value="{{ c.image if c.image.startswith('http') }}" placeholder="ลิงก์รูป (ถ้ามี)">
+  <span class="cfile">{% if c.image %}<img class="thumb" style="width:36px;height:36px" src="{{ c.image }}" alt=""> {% endif %}<input type="file" name="color_image_file" accept="image/*"></span>
+  <button type="button" class="btn red rm-color">ลบสี</button></div>{% endfor %}
+</div>
+<template id="color-row-tpl"><div class="color-row"><input type="hidden" name="color_id" value="">
+  <input name="color_name" placeholder="ชื่อสี เช่น Black" required>
+  <input name="color_stock" type="number" min="0" value="10" title="สต็อกของสีนี้">
+  <input name="color_image_url" placeholder="ลิงก์รูป (ถ้ามี)">
+  <span class="cfile"><input type="file" name="color_image_file" accept="image/*"></span>
+  <button type="button" class="btn red rm-color">ลบสี</button></div></template>
+<p><button type="button" class="btn ghost" id="add-color">+ เพิ่มสี</button></p>
+
+<label>สี (ใช้เมื่อสินค้ามีสีเดียว)</label><input name="color" value="{{ p.color if p }}">
+<label>จำนวนในสต็อก (ใช้เมื่อสินค้ามีสีเดียว — ถ้ามีหลายสี ระบบนับสต็อกรวมจากแต่ละสี)</label><input name="stock" type="number" min="0" value="{{ p.stock if p else 10 }}">
+<p><button class="btn ac">บันทึก</button> <a class="btn ghost" href="{{ url_for('admin.products') }}">ยกเลิก</a></p></form>{% endblock %}

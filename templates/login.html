@@ -1,0 +1,5 @@
+{% extends "base.html" %}{% block content %}<form class="box" method="post">
+<h2>{{ 'ADMIN เข้าสู่ระบบ' if admin else 'เข้าสู่ระบบ' }}</h2>
+<label>{{ 'ID ADMIN' if admin else 'ชื่อผู้ใช้ หรือ อีเมล' }}</label><input name="login" required>
+<label>รหัสผ่าน</label><input name="password" type="password"{{ ' required' if admin }}><p><button class="btn ac">เข้าสู่ระบบ</button> {% if not admin %}<a class="btn ghost" href="{{ url_for('auth.forgot') }}">ลืมรหัสผ่าน</a>{% endif %}</p>
+{% if not admin %}<p class="mut">ยังไม่มีบัญชี? <a href="{{ url_for('auth.register') }}"><u>สมัครสมาชิก</u></a></p>{% endif %}</form>{% endblock %}

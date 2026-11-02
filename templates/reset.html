@@ -1,0 +1,5 @@
+{% extends "base.html" %}{% block content %}<form class="box" method="post"><h2>ตั้งรหัสผ่านใหม่</h2>
+<p class="mut">ยืนยันตัวตนสำเร็จ กรุณาตั้งรหัสผ่านใหม่ภายใน 10 นาที</p>
+<label>รหัสผ่านใหม่ (6 ตัวขึ้นไป)</label><input name="password" type="password" required pattern="(?=.*[a-z])(?=.*[A-Z]).{6,}" title="อย่างน้อย 6 ตัว และมีตัวพิมพ์ใหญ่และพิมพ์เล็ก"><p class="mut" style="font-size:13px;margin:6px 0 0">ต้องมีตัวพิมพ์ใหญ่และตัวพิมพ์เล็กอย่างน้อยอย่างละ 1 ตัว ตัวเลขใส่กี่ตัวก็ได้</p>
+<label>ยืนยันรหัสผ่านใหม่</label><input name="password2" type="password" required>
+<p><button class="btn ac">บันทึกรหัสผ่านใหม่</button></p></form>{% endblock %}

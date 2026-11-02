@@ -1,0 +1,14 @@
+{% extends "admin/base.html" %}{% block admin %}
+<form class="box" method="post" enctype="multipart/form-data"><h2>{{ 'แก้ไขวิดเจ็ต' if w else 'เพิ่มวิดเจ็ต' }}</h2>
+<label>ชนิด</label><select name="kind">{% for k,n in [('text','ข้อความ'),('image','รูป + ข้อความ'),('quote','คำพูดลูกค้า (ชื่อ = ผู้พูด)'),('highlight','แถบโปรโมชัน')] %}<option value="{{ k }}" {{ 'selected' if w and w.kind==k }}>{{ n }}</option>{% endfor %}</select>
+<label>ขนาด</label><select name="size"><option value="card">การ์ด (เรียงข้างกัน)</option><option value="full" {{ 'selected' if w and w.size=='full' }}>เต็มแถว</option></select>
+<label>หัวข้อ / ชื่อผู้พูด</label><input name="title" value="{{ w.title if w }}">
+<label>เนื้อหา</label><textarea name="body" rows="4">{{ w.body if w }}</textarea>
+<label>รูป — อัปโหลดไฟล์ (ใช้กับชนิด "รูป + ข้อความ")</label><input type="file" name="image_file" accept="image/*">
+<label>หรือลิงก์รูป (URL)</label><input name="image_url" value="{{ w.image if w and w.image.startswith('http') }}">
+{% if w and w.image %}<label><input type="checkbox" name="remove_image" style="width:auto"> ลบรูปปัจจุบัน</label>{% endif %}
+<label>ข้อความบนปุ่มลิงก์ (เว้นว่าง = ไม่มีปุ่ม)</label><input name="link_text" value="{{ w.link_text if w }}">
+<label>ลิงก์ เช่น /products หรือ https://...</label><input name="link" value="{{ w.link if w }}">
+<label>ลำดับ</label><input type="number" name="position" value="{{ w.position if w else 0 }}">
+<label><input type="checkbox" name="active" style="width:auto" {{ 'checked' if (not w) or w.active }}> แสดงบนหน้าแรก</label>
+<p><button class="btn ac">บันทึก</button> <a class="btn ghost" href="{{ url_for('admin.widgets') }}">ยกเลิก</a></p></form>{% endblock %}

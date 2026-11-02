@@ -1,0 +1,32 @@
+{% extends "admin/base.html" %}{% block admin %}
+<p><a class="btn ghost" href="{{ url_for('admin.orders', status=o.status) }}">← กลับรายการ</a></p>
+<h2 class="sec" style="margin-top:0">ตรวจสอบคำสั่งซื้อ #{{ o.user_order_no }} <span class="mut" style="font-size:15px">(รหัสระบบ {{ o.id }} · {{ o.username }})</span>
+ <span class="badge-s {{ o.status }}" style="vertical-align:middle">{{ o.status|status_th }}</span></h2>
+<div class="review">
+ <div class="slipbox"><h3 style="margin-top:0">สลิปโอนเงินของลูกค้า</h3>
+  {% if o.slip %}<a href="{{ url_for('shop.order_slip', oid=o.id) }}" target="_blank" rel="noopener"><img src="{{ url_for('shop.order_slip', oid=o.id) }}" alt="สลิปโอนเงิน"></a>
+  <p class="mut" style="margin-bottom:0">คลิกที่รูปเพื่อเปิดขนาดเต็ม</p>{% else %}<p class="mut">ไม่มีสลิปแนบ (ออเดอร์เก่าก่อนมีระบบสลิป)</p>{% endif %}</div>
+ <div>
+  <div class="need"><span class="mut">ยอดที่ต้องได้รับ (รวม VAT)</span><b>฿{{ o.total|money }}</b><small class="mut">ตรวจว่ายอด วันเวลา และบัญชีผู้รับในสลิป ตรงกับยอดนี้</small></div>
+  <dl class="info"><dt>วันที่สั่งซื้อ</dt><dd>{{ o.created_at|thai_dt }}</dd>
+   <dt>ยอดสินค้า (ก่อน VAT)</dt><dd>฿{{ o.subtotal|money }}</dd>
+   <dt>VAT {{ (o.vat_rate*100)|round|int }}%</dt><dd>฿{{ o.vat|money }}</dd>
+   <dt>ผู้รับ</dt><dd>{{ o.ship_name or '-' }} · {{ o.ship_phone or '' }}<br>{{ o.ship_address or '' }}</dd></dl>
+  {% for i in items %}<div class="line">{% if i.img %}<img class="thumb" src="{{ i.img }}" alt="">{% else %}<span class="thumb"></span>{% endif %}
+   <div style="flex:1"><b>{{ i.name }}</b><br><span class="mut">{{ i.brand or '' }}{% if i.color %} · สี {{ i.color }}{% endif %} · ฿{{ i.price|baht }} × {{ i.qty }}</span></div><b>฿{{ (i.price*i.qty)|baht }}</b></div>{% endfor %}
+
+  {% if o.status == 'pending' %}
+  <div class="decide">
+   <form method="post" action="{{ url_for('admin.order_approve', oid=o.id) }}" onsubmit="return confirm('ยืนยันว่าได้รับเงินครบ {{ o.total|money }} บาท แล้วอนุมัติคำสั่งซื้อนี้?')">
+    <button class="btn ac">✅ อนุมัติ (ได้รับเงินแล้ว)</button></form>
+   <form method="post" action="{{ url_for('admin.order_reject', oid=o.id) }}" onsubmit="return confirm('ปฏิเสธคำสั่งซื้อนี้และคืนสต็อกสินค้า?')">
+    <label for="reason" style="margin-top:0">เหตุผลที่ปฏิเสธ (ลูกค้าจะเห็นและได้รับอีเมล)</label>
+    <input id="reason" name="reason" maxlength="300" required placeholder="เช่น ยอดโอนไม่ครบ / สลิปไม่ชัด / ไม่พบรายการโอนเข้าบัญชี">
+    <button class="btn red" style="margin-top:10px">❌ ปฏิเสธ</button></form>
+  </div>
+  {% else %}
+  <p class="mut" style="margin-top:16px">ตัดสินเมื่อ {{ o.reviewed_at|thai_dt if o.reviewed_at else '-' }}{% if o.status=='rejected' %}<br><b style="color:#c62828">เหตุผล: {{ o.reject_reason }}</b>{% endif %}</p>
+  {% if o.status=='paid' %}<a class="btn ghost" href="{{ url_for('shop.receipt', oid=o.id) }}" target="_blank" rel="noopener">🖨 ใบเสร็จ</a>{% endif %}
+  {% endif %}
+ </div>
+</div>{% endblock %}

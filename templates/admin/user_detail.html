@@ -1,0 +1,6 @@
+{% extends "admin/base.html" %}{% block admin %}<h2 class="sec">{{ u.username }}</h2>
+<p>{{ u.full_name }} · {{ u.email }} · {{ u.phone }}<br>{{ u.address }}<br><span class="mut">สมัครเมื่อ {{ u.created_at }}</span></p>
+<h3>สินค้าที่ซื้อไปแล้ว</h3>
+{% for o,items in data %}<div class="box" style="max-width:none;margin:12px 0"><b>#{{ o.user_order_no }}</b> · {{ o.created_at }} · ฿{{ o.total|baht }} · <span class="badge-s {{ o.status }}">{{ o.status|status_th }}</span>
+<ul>{% for i in items %}<li>{% if i.img %}<img src="{{ i.img }}" width="36" style="vertical-align:middle"> {% endif %}{{ i.name }} × {{ i.qty }} — ฿{{ (i.price*i.qty)|baht }}</li>{% endfor %}</ul></div>
+{% else %}<p class="mut">ยังไม่เคยซื้อสินค้า</p>{% endfor %}{% endblock %}

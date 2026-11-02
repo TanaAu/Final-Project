@@ -1,0 +1,48 @@
+{% extends "base.html" %}{% block content %}<div class="box qr"><p class="mut">ขั้นตอน 2/2</p><h2>สแกนเพื่อชำระเงิน</h2>
+{% if pay.qr %}<img class="payqr" src="{{ pay.qr }}" alt="QR สำหรับชำระเงิน">
+{% else %}<p class="mut" style="font-size:14px;margin:0 0 8px">ร้านยังไม่ได้ตั้งค่า QR ชำระเงิน</p>{{ qr|safe }}{% endif %}
+{% if pay.name or pay.account or pay.note %}<dl class="info" style="text-align:left;max-width:340px;margin:14px auto 0">
+ {% if pay.name %}<dt>ชื่อบัญชี</dt><dd>{{ pay.name }}</dd>{% endif %}{% if pay.account %}<dt>เลขบัญชี / พร้อมเพย์</dt><dd>{{ pay.account }}</dd>{% endif %}
+ {% if pay.note %}<dt>หมายเหตุ</dt><dd>{{ pay.note }}</dd>{% endif %}</dl>{% endif %}
+<p class="price">ยอดชำระ ฿{{ grand|money }}</p>
+
+{# ===== แนบสลิปโอนเงิน: ต้องเลือกไฟล์ก่อน ปุ่ม "ถัดไป" ถึงจะกดได้ (เซิร์ฟเวอร์ตรวจซ้ำอีกชั้นใน shop.py) ===== #}
+<form method="post" enctype="multipart/form-data" id="payform">
+ <div class="slipbox" id="slipbox">
+  <b>แนบสลิปโอนเงิน <span class="warn">*จำเป็น</span></b>
+  <p class="mut" style="margin:4px 0 12px;font-size:14px">โอนเงินแล้วถ่ายภาพหน้าจอสลิปมาแนบที่นี่ (ไฟล์ PNG / JPG / WEBP ไม่เกิน 16 MB)</p>
+  <label class="btn ghost" for="slip" id="slipbtn">เลือกไฟล์สลิป</label>
+  <input type="file" name="slip" id="slip" accept="image/png,image/jpeg,image/webp" hidden>
+  <div id="slipinfo" class="mut" style="margin-top:10px;font-size:14px">ยังไม่ได้แนบสลิป</div>
+  <img id="slipprev" alt="ตัวอย่างสลิป" hidden>
+  <p id="sliperr" class="warn" style="margin:8px 0 0" hidden></p>
+ </div>
+ <p class="row" style="justify-content:center;margin-top:16px"><button class="btn ac" id="paynext" disabled>ถัดไป</button> <a class="btn ghost" href="{{ url_for('shop.checkout') }}">ย้อนกลับ</a></p>
+ <p class="mut" id="payhint" style="font-size:13px;margin:0">ต้องแนบสลิปก่อนจึงจะกด “ถัดไป” ได้</p>
+</form></div>
+<script>
+(() => {
+  const inp = document.getElementById('slip'), btn = document.getElementById('paynext'), info = document.getElementById('slipinfo'),
+        prev = document.getElementById('slipprev'), err = document.getElementById('sliperr'), hint = document.getElementById('payhint'),
+        lbl = document.getElementById('slipbtn');
+  const OK = ['image/png', 'image/jpeg', 'image/webp'], MAX = 16 * 1024 * 1024;
+  const reset = msg => {                      // ไม่มีไฟล์ที่ใช้ได้ -> ล็อกปุ่มถัดไป
+    inp.value = ''; btn.disabled = true; prev.hidden = true; prev.removeAttribute('src');
+    info.textContent = 'ยังไม่ได้แนบสลิป'; hint.hidden = false; lbl.textContent = 'เลือกไฟล์สลิป';
+    err.textContent = msg || ''; err.hidden = !msg;
+  };
+  inp.addEventListener('change', () => {
+    const f = inp.files[0];
+    if (!f) return reset();
+    if (!OK.includes(f.type)) return reset('ไฟล์ต้องเป็นรูป PNG, JPG หรือ WEBP เท่านั้น');
+    if (f.size > MAX) return reset('ไฟล์ใหญ่เกิน 16 MB กรุณาเลือกไฟล์ที่เล็กลง');
+    err.hidden = true; info.textContent = '✔ แนบแล้ว: ' + f.name + ' (' + Math.ceil(f.size / 1024).toLocaleString() + ' KB)';
+    prev.src = URL.createObjectURL(f); prev.hidden = false; btn.disabled = false; hint.hidden = true; lbl.textContent = 'เปลี่ยนไฟล์สลิป';
+  });
+  document.getElementById('payform').addEventListener('submit', e => {    // กัน Enter / ปุ่มที่ถูกเปิดด้วยวิธีอื่น
+    if (!inp.files.length) { e.preventDefault(); reset('กรุณาแนบสลิปโอนเงินก่อน'); }
+    else btn.disabled = true;                                              // กันกดซ้ำ = กันสร้างออเดอร์ซ้ำ
+  });
+  reset();
+})();
+</script>{% endblock %}

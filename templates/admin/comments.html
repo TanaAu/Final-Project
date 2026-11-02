@@ -1,0 +1,15 @@
+{% extends "admin/base.html" %}{% block admin %}<h2 class="sec">คอมเมนต์ลูกค้า (ล่างสุดหน้าแรก)</h2>
+<form method="post" class="card" style="padding:20px;max-width:720px">
+ <h3 style="margin-top:0">เพิ่มคอมเมนต์</h3>
+ <label>ชื่อที่แสดง <small class="mut">(ไม่บังคับ — ใส่ชื่อลูกค้าเพื่อลงในนามลูกค้า / เว้นว่าง = ลงในนาม ADMIN ขึ้นป้าย "ร้านค้า")</small></label>
+ <input name="author" maxlength="60" placeholder="เช่น คุณสมชาย">
+ <label>ข้อความ</label><textarea name="body" rows="3" maxlength="500" required placeholder="ข้อความคอมเมนต์ (ไม่เกิน 500 ตัวอักษร)"></textarea>
+ <p><button class="btn ac">เพิ่มคอมเมนต์</button> <a class="btn ghost" href="{{ url_for('shop.home') }}#comments" target="_blank" rel="noopener">ดูหน้าแรก</a></p>
+</form>
+<h3>คอมเมนต์ทั้งหมด ({{ rows|length }})</h3>
+<div class="tablewrap"><table><tr><th>วันที่</th><th>ผู้เขียน</th><th>ข้อความ</th><th></th></tr>
+{% for c in rows %}<tr><td style="white-space:nowrap">{{ c.created_at|thai_dt }}</td>
+<td><b>{{ c.author or c.full_name or c.username }}</b><br><span class="mut">{% if c.author %}ADMIN เพิ่มให้{% elif c.is_admin %}ADMIN{% else %}ลูกค้า @{{ c.username }}{% endif %}</span></td>
+<td style="white-space:pre-line;overflow-wrap:anywhere">{{ c.body }}</td>
+<td><form method="post" action="{{ url_for('admin.comment_delete', cid=c.id) }}" onsubmit="return confirm('ลบคอมเมนต์นี้?')"><button class="btn red">ลบ</button></form></td></tr>
+{% else %}<tr><td colspan="4" class="mut">ยังไม่มีคอมเมนต์</td></tr>{% endfor %}</table></div>{% endblock %}

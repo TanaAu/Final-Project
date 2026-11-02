@@ -1,0 +1,30 @@
+{% extends "admin/base.html" %}{% block admin %}<h2 class="sec" style="margin-top:0">ภาพรวมร้าน</h2>
+
+<h3 class="grp-title">🛒 ระบบขายของ</h3>
+<div class="grid sm">
+ <a class="card body" href="{{ url_for('admin.products') }}"><span class="mut">สินค้า</span><b class="price">{{ s.p }}</b></a>
+ <a class="card body" href="{{ url_for('admin.categories') }}"><span class="mut">หมวดหมู่</span><b class="price">{{ s.c }}</b></a>
+ <a class="card body" href="{{ url_for('admin.orders', status='pending') }}" {% if s.pend %}style="border-color:#f0d58a;background:#fff9e6"{% endif %}><span class="mut">รอตรวจสลิป</span><b class="price" {% if s.pend %}style="color:#c62828"{% endif %}>{{ s.pend }}</b></a>
+ <a class="card body" href="{{ url_for('admin.users', tab='ship') }}" {% if ship_wait %}style="border-color:#bcd0ff;background:#f1f5ff"{% endif %}><span class="mut">รอจัดส่ง</span><b class="price">{{ ship_wait }}</b></a>
+ <a class="card body" href="{{ url_for('admin.orders', status='all') }}"><span class="mut">คำสั่งซื้อทั้งหมด</span><b class="price">{{ s.o }}</b></a>
+ <a class="card body" href="{{ url_for('admin.users') }}"><span class="mut">ลูกค้า</span><b class="price">{{ s.u }}</b></a>
+</div>
+
+<h3 class="grp-title">📈 รายงานยอดขาย (Dashboard)</h3>
+<div class="grid sm kpis">{% for k in ov.kpis %}<a class="card body" href="{{ url_for('admin.sales', period=['day','month','year'][loop.index0]) }}"><span class="mut">ยอดขาย{{ k.label }}</span><b class="price">฿{{ k.rev|money }}</b>
+ <small class="mut">{{ k.n }} คำสั่งซื้อ</small>{% if k.change is not none %}<small class="chg {{ 'up' if k.change >= 0 else 'down' }}">{{ '▲' if k.change >= 0 else '▼' }} {{ k.change|abs }}% {{ k.cmp }}</small>{% else %}<small class="mut">{{ k.cmp }}: ไม่มียอดให้เทียบ</small>{% endif %}</a>{% endfor %}</div>
+<div class="chartbox" style="margin-top:14px"><div class="legend"><b>ยอดขาย 12 เดือนล่าสุด</b><span><i style="background:#2f4bff"></i>12 เดือนล่าสุด</span><span><i style="background:#b9c1da"></i>ช่วงเดียวกันของปีก่อน</span></div>{{ ov.chart }}
+ {% if not ov.has_data %}<p class="mut" style="text-align:center;margin:0">ยังไม่มียอดขายที่อนุมัติแล้ว</p>{% endif %}<a class="btn ghost" href="{{ url_for('admin.sales') }}">ดูรายงานละเอียด วัน / เดือน / ปี →</a></div>
+
+<h3 class="grp-title">💰 ข้อมูลรายได้</h3>
+<div class="grid sm">
+ <a class="card body" href="{{ url_for('admin.sales') }}"><span class="mut">ยอดขายวันนี้</span><b class="price">฿{{ today.r|money }}</b><small class="mut">{{ today.n }} คำสั่งซื้อ</small></a>
+ <a class="card body" href="{{ url_for('admin.sales') }}"><span class="mut">ยอดขายรวม (อนุมัติแล้ว)</span><b class="price">฿{{ s.r|money }}</b></a>
+</div>
+
+<h3 class="grp-title">🎨 ระบบแต่งเว็บ</h3>
+<div class="grid sm">
+ <a class="card body" href="{{ url_for('admin.banners') }}"><span class="mut">แบนเนอร์ที่แสดงอยู่</span><b class="price">{{ s.b }}</b></a>
+ <a class="card body" href="{{ url_for('admin.widgets') }}"><span class="mut">วิดเจ็ตที่แสดงอยู่</span><b class="price">{{ s.w }}</b></a>
+ <a class="card body" href="{{ url_for('admin.comments') }}"><span class="mut">คอมเมนต์</span><b class="price">{{ s.cm }}</b></a>
+</div>{% endblock %}

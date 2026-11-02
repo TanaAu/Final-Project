@@ -1,0 +1,11 @@
+{% extends "admin/base.html" %}{% block admin %}<h2 class="sec" style="margin-top:0">ช่องทางชำระเงิน (QR / รูปภาพ)</h2>
+<p class="mut">รูปที่อัปโหลดจะแสดงให้ลูกค้าสแกนจ่ายที่หน้า <b style="color:var(--ink)">ตรวจสอบคำสั่งซื้อ ขั้นตอน 2/2</b> ถ้าไม่ได้ตั้งค่า ระบบจะแสดง QR จำลองแทน</p>
+<form class="box wide" method="post" enctype="multipart/form-data" style="margin-top:0">
+ <label>รูป QR / รูปภาพสำหรับสแกนจ่าย </label>
+ {% if pay.qr %}<div style="margin:8px 0"><img class="payqr" src="{{ pay.qr }}" alt="QR ปัจจุบัน"><br><small class="mut"></small></div>{% endif %}
+ <input type="file" name="qr" accept="image/png,image/jpeg,image/webp,image/gif">
+ {% if pay.qr %}<label style="color:var(--ink)"><input type="checkbox" name="remove_qr" style="width:auto"> ลบรูปนี้ </label>{% endif %}
+ <label>ชื่อบัญชี </label><input name="pay_name" value="{{ pay.name }}" maxlength="200">
+ <label>เลขบัญชี / เบอร์พร้อมเพย์ </label><input name="pay_account" value="{{ pay.account }}" maxlength="200">
+ <label>หมายเหตุถึงลูกค้า เช่น "โอนแล้วแนบสลิปด้านล่าง"</label><input name="pay_note" value="{{ pay.note }}" maxlength="200">
+ <p><button class="btn ac">บันทึก</button></p></form>{% endblock %}

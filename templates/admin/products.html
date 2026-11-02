@@ -1,0 +1,7 @@
+{% extends "admin/base.html" %}{% block admin %}<div class="row" style="justify-content:space-between"><h2 class="sec">จัดการสินค้า</h2>
+<a class="btn ac" href="{{ url_for('admin.product_form') }}">เพิ่มสินค้าใหม่</a></div>
+<div class="tablewrap"><table><tr><th>รูป</th><th>ชื่อ</th><th>หมวดหมู่</th><th>แบรนด์</th><th>ราคา</th><th>สี</th><th>สต็อกรวม</th><th></th></tr>
+{% for p in items %}{% set img = p.image or p.color_img %}<tr><td>{% if img %}<img src="{{ img }}" width="48">{% endif %}</td><td>{{ p.name }}</td><td>{{ p.category }}</td><td>{{ p.brand }}</td><td>฿{{ p.price|baht }}</td>
+<td>{{ (p.ncolors ~ ' สี') if p.ncolors else (p.color or '-') }}</td><td>{{ p.total_stock }}</td>
+<td class="row"><a class="btn ghost" href="{{ url_for('admin.product_form', pid=p.id) }}">แก้ไข</a>
+<form method="post" action="{{ url_for('admin.product_delete', pid=p.id) }}" onsubmit="return confirm('ลบสินค้านี้?')"><button class="btn red">ลบ</button></form></td></tr>{% endfor %}</table></div>{% endblock %}

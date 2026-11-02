@@ -1,0 +1,9 @@
+{% extends "admin/base.html" %}{% block admin %}<div class="row" style="justify-content:space-between"><h2 class="sec">วิดเจ็ตหน้าแรก</h2>
+<a class="btn ac" href="{{ url_for('admin.widget_form') }}">เพิ่มวิดเจ็ต</a></div>
+<p class="mut">บล็อกเสริมที่แสดงต่อจาก "สินค้าล่าสุด" เช่น ข้อความ รูปพร้อมลิงก์ คำพูดลูกค้า หรือแถบโปรโมชัน</p>
+<div class="tablewrap"><table><tr><th>ลำดับ</th><th>ชนิด</th><th>ขนาด</th><th>เนื้อหา</th><th>สถานะ</th><th></th></tr>
+{% for w in rows %}<tr><td>{{ w.position }}</td><td>{{ {'text':'ข้อความ','image':'รูป+ข้อความ','quote':'คำพูดลูกค้า','highlight':'แถบโปรโมชัน'}[w.kind] }}</td><td>{{ 'เต็มแถว' if w.size=='full' else 'การ์ด' }}</td>
+<td><b>{{ w.title }}</b><br><span class="mut">{{ w.body[:60] }}</span></td><td>{{ 'แสดง' if w.active else 'ซ่อน' }}</td>
+<td class="row"><a class="btn ghost" href="{{ url_for('admin.widget_form', wid=w.id) }}">แก้ไข</a>
+<form method="post" action="{{ url_for('admin.widget_delete', wid=w.id) }}" onsubmit="return confirm('ลบวิดเจ็ตนี้?')"><button class="btn red">ลบ</button></form></td></tr>
+{% else %}<tr><td colspan="6" class="mut">ยังไม่มีวิดเจ็ต</td></tr>{% endfor %}</table></div>{% endblock %}

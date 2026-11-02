@@ -1,0 +1,13 @@
+{% extends "admin/base.html" %}{% block admin %}
+<form class="box" method="post" enctype="multipart/form-data"><h2>{{ 'แก้ไขแบนเนอร์' if b else 'เพิ่มแบนเนอร์' }}</h2>
+<label>หัวข้อใหญ่</label><input name="title" value="{{ b.title if b }}">
+<label>ข้อความรอง</label><input name="subtitle" value="{{ b.subtitle if b }}">
+<label>ข้อความบนปุ่ม (เว้นว่าง = ไม่มีปุ่ม)</label><input name="button_text" value="{{ b.button_text if b }}">
+<label>ลิงก์ของปุ่ม เช่น /products หรือ https://...</label><input name="button_link" value="{{ b.button_link if b }}">
+<label>สีพื้นหลัง/สีทับรูป</label><input type="color" name="color" value="{{ b.color if b else '#0f1420' }}" style="height:44px;padding:4px">
+<label>รูปพื้นหลัง — อัปโหลดไฟล์</label><input type="file" name="image_file" accept="image/*">
+<label>หรือใส่ลิงก์รูป (URL)</label><input name="image_url" value="{{ b.image if b and b.image.startswith('http') }}">
+{% if b and b.image %}<label><input type="checkbox" name="remove_image" style="width:auto"> ลบรูปปัจจุบัน (ใช้รูปเริ่มต้นแทน)</label>{% endif %}
+<label>ลำดับ (เลขน้อยแสดงก่อน)</label><input type="number" name="position" value="{{ b.position if b else 0 }}">
+<label><input type="checkbox" name="active" style="width:auto" {{ 'checked' if (not b) or b.active }}> แสดงบนหน้าแรก</label>
+<p><button class="btn ac">บันทึก</button> <a class="btn ghost" href="{{ url_for('admin.banners') }}">ยกเลิก</a></p></form>{% endblock %}

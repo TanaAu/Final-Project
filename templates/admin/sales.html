@@ -1,0 +1,35 @@
+{% extends "admin/base.html" %}{% block admin %}<h2 class="sec" style="margin-top:0">รายได้และรายงานยอดขาย</h2>
+<p class="mut" style="margin-top:0">นับเฉพาะคำสั่งซื้อที่ ADMIN อนุมัติการชำระเงินแล้ว · ใช้วันเวลาไทย · ยอดรวมคือยอดที่ลูกค้าจ่ายจริง (รวม VAT)</p>
+<div class="tabs"><a class="{{ 'on' if r.period=='day' }}" href="{{ url_for('admin.sales', period='day') }}">📅 รายวัน</a><a class="{{ 'on' if r.period=='month' }}" href="{{ url_for('admin.sales', period='month') }}">🗓 รายเดือน</a><a class="{{ 'on' if r.period=='year' }}" href="{{ url_for('admin.sales', period='year') }}">📆 รายปี</a></div>
+<form method="get" class="row" style="margin-bottom:16px"><input type="hidden" name="period" value="{{ r.period }}">
+ <a class="btn ghost" href="{{ url_for('admin.sales', period=r.period, **r.prev_args) }}">← ก่อนหน้า</a>
+ {% if r.period=='day' %}<input type="date" name="date" value="{{ r.picker }}" max="{{ today }}" onchange="this.form.submit()" style="width:auto">
+ {% elif r.period=='month' %}<input type="month" name="month" value="{{ r.picker }}" max="{{ today.strftime('%Y-%m') }}" onchange="this.form.submit()" style="width:auto">
+ {% else %}<input type="number" name="year" value="{{ r.picker }}" min="2000" max="{{ today.year }}" title="ปี ค.ศ." onchange="this.form.submit()" style="width:110px">{% endif %}
+ <button class="btn ac">ดูรายงาน</button>
+ {% if r.next_args %}<a class="btn ghost" href="{{ url_for('admin.sales', period=r.period, **r.next_args) }}">ถัดไป →</a><a class="btn ghost" href="{{ url_for('admin.sales', period=r.period) }}">ล่าสุด</a>{% endif %}</form>
+
+<h3 class="grp-title">① สรุปยอด — {{ r.title }}</h3>
+<div class="grid sm kpis">
+ <div class="card body"><span class="mut">ยอดขายรวม (รวม VAT)</span><b class="price">฿{{ r.cur.rev|money }}</b>
+  {% if r.change is not none %}<small class="chg {{ 'up' if r.change >= 0 else 'down' }}">{{ '▲' if r.change >= 0 else '▼' }} {{ r.change|abs }}% เทียบ {{ r.prev_title }}</small>{% else %}<small class="mut">{{ r.prev_title }} ไม่มียอดให้เทียบ</small>{% endif %}</div>
+ <div class="card body"><span class="mut">ก่อน VAT</span><b class="price">฿{{ r.cur.ex|money }}</b></div>
+ <div class="card body"><span class="mut">VAT ที่เก็บ</span><b class="price">฿{{ r.cur.vat|money }}</b></div>
+ <div class="card body"><span class="mut">คำสั่งซื้อ</span><b class="price">{{ r.cur.n }}</b><small class="mut">ช่วงก่อน {{ r.prev.n }}</small></div>
+ <div class="card body"><span class="mut">สินค้าที่ขายได้ (ชิ้น)</span><b class="price">{{ r.cur.units }}</b><small class="mut">ช่วงก่อน {{ r.prev.units }}</small></div>
+ <div class="card body"><span class="mut">เฉลี่ยต่อคำสั่งซื้อ</span><b class="price">฿{{ r.cur.avg|money }}</b></div></div>
+
+<h3 class="grp-title">② กราฟเปรียบเทียบ — {{ r.unit }}</h3>
+<div class="chartbox"><div class="legend"><span><i style="background:#2f4bff"></i>{{ r.title }}</span><span><i style="background:#b9c1da"></i>{{ r.prev_title }}</span></div>{{ r.chart }}
+ {% if not r.cur.rev and not r.prev.rev %}<p class="mut" style="text-align:center;margin:0">ยังไม่มียอดขายในช่วงนี้</p>{% endif %}<small class="mut">เอาเมาส์ชี้ที่แท่งเพื่อดูยอดเงิน</small></div>
+
+<h3 class="grp-title">③ สินค้าขายดีใน{{ r.title }}</h3>
+{% for t in r.tops %}<div class="hbar"><div class="hl"><b>{{ t.name }}</b>{% if t.color %} <span class="mut">· {{ t.color }}</span>{% endif %}<span class="mut"> · {{ t.qty }} ชิ้น</span></div>
+ <div class="hb"><span style="width:{{ (t.revenue / r.top_max * 100)|round(1) }}%"></span></div><b>฿{{ t.revenue|money }}</b></div>
+{% else %}<p class="mut">ยังไม่มียอดขายในช่วงนี้</p>{% endfor %}
+
+<h3 class="grp-title">④ รายการคำสั่งซื้อ ({{ r.orders|length }}{% if r.orders|length >= 200 %}+{% endif %})</h3>
+<div class="tablewrap"><table><tr><th>วัน-เวลา</th><th>ลูกค้า</th><th>ยอดรวม</th><th></th></tr>
+{% for o in r.orders %}<tr><td>{{ o.local_time[8:10] }}/{{ o.local_time[5:7] }}/{{ o.local_time[0:4]|int + 543 }} {{ o.local_time[11:16] }} น.</td><td>{{ o.username }} <span class="mut">(#{{ o.user_order_no }})</span></td><td>฿{{ o.total|money }}</td>
+<td class="row"><a class="btn ghost" href="{{ url_for('shop.receipt', oid=o.id) }}" target="_blank" rel="noopener">ใบเสร็จ</a>{% if o.slip %}<a class="btn ghost" href="{{ url_for('shop.order_slip', oid=o.id) }}" target="_blank" rel="noopener">ดูสลิป</a>{% endif %}</td></tr>
+{% else %}<tr><td colspan="4" class="mut">ไม่มีคำสั่งซื้อในช่วงที่เลือก</td></tr>{% endfor %}</table></div>{% endblock %}

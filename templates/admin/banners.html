@@ -1,0 +1,8 @@
+{% extends "admin/base.html" %}{% block admin %}<div class="row" style="justify-content:space-between"><h2 class="sec">แบนเนอร์หน้าแรก</h2>
+<a class="btn ac" href="{{ url_for('admin.banner_form') }}">เพิ่มแบนเนอร์</a></div>
+<p class="mut">แบนเนอร์จะเลื่อนอัตโนมัติทุก 5 วินาที เรียงตามเลขลำดับ (น้อยไปมาก)</p>
+<div class="tablewrap"><table><tr><th>ลำดับ</th><th>ตัวอย่าง</th><th>ข้อความ</th><th>ปุ่ม</th><th>สถานะ</th><th></th></tr>
+{% for b in rows %}<tr><td>{{ b.position }}</td><td><span class="swatch" style="background:{{ b.color }}">{% if b.image %}<img src="{{ b.image }}" alt="">{% endif %}</span></td>
+<td><b>{{ b.title }}</b><br><span class="mut">{{ b.subtitle }}</span></td><td>{{ b.button_text }}</td><td>{{ 'แสดง' if b.active else 'ซ่อน' }}</td>
+<td class="row"><a class="btn ghost" href="{{ url_for('admin.banner_form', bid=b.id) }}">แก้ไข</a>
+<form method="post" action="{{ url_for('admin.banner_delete', bid=b.id) }}" onsubmit="return confirm('ลบแบนเนอร์นี้?')"><button class="btn red">ลบ</button></form></td></tr>{% endfor %}</table></div>{% endblock %}

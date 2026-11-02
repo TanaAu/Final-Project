@@ -1,0 +1,33 @@
+{% extends "base.html" %}{% block content %}
+<div class="prof">
+ <div class="prof-head">{% if g.user.avatar %}<img class="avatar" src="{{ g.user.avatar }}" alt="รูปโปรไฟล์">{% else %}<div class="avatar">{{ (g.user.full_name or g.user.username)[:1]|upper }}</div>{% endif %}
+  <div><h2 style="margin:0">{{ g.user.full_name or g.user.username }}</h2><span class="mut">@{{ g.user.username }}{% if g.user.is_admin %} · <b style="color:var(--ac)">ADMIN</b>{% endif %} · สมาชิกตั้งแต่ {{ g.user.created_at[:10] }}</span></div>
+  {% if not edit %}<a class="btn ac" style="margin-left:auto" href="{{ url_for('shop.profile', edit=1, next=next) }}">แก้ไขข้อมูล</a>{% endif %}</div>
+ {% if not g.user.is_admin %}<div class="stats"><a href="{{ url_for('shop.orders') }}"><b>{{ st.n }}</b><span class="mut">คำสั่งซื้อ</span></a><a href="{{ url_for('shop.orders') }}"><b>฿{{ st.s|baht }}</b><span class="mut">ยอดซื้อรวม</span></a></div>{% endif %}
+ {% if edit %}
+ <form method="post" enctype="multipart/form-data" class="card" style="padding:22px"><input type="hidden" name="next" value="{{ next }}"><h3 style="margin-top:0">แก้ไขข้อมูล</h3>
+  <label>รูปโปรไฟล์</label>
+  <div class="avatar-edit">
+   {% if g.user.avatar %}<img class="avatar" id="avprev" src="{{ g.user.avatar }}" alt="">{% else %}<div class="avatar" id="avph">{{ (g.user.full_name or g.user.username)[:1]|upper }}</div><img class="avatar" id="avprev" alt="" hidden>{% endif %}
+   <div><input type="file" name="avatar" id="avatar" accept="image/png,image/jpeg,image/webp,image/gif">
+    <small class="mut" style="display:block;margin-top:6px">PNG / JPG / WEBP / GIF ไม่เกิน 16 MB — ไม่เลือกไฟล์ = ใช้รูปเดิม</small>
+    {% if g.user.avatar %}<label style="color:var(--ink);margin-top:8px;display:block"><input type="checkbox" name="remove_avatar" value="1" style="width:auto"> ลบรูปโปรไฟล์ปัจจุบัน</label>{% endif %}</div></div>
+  <label>อีเมล{% if g.user.is_admin %} <small class="mut">(ADMIN แก้ที่ config.py)</small>{% endif %}</label><input name="email" type="email" value="{{ g.user.email }}" {{ 'readonly' if g.user.is_admin else 'required' }} pattern="[A-Za-z0-9._%+\-]+@gmail\.com" title="ต้องเป็น Gmail เช่น name@gmail.com" placeholder="name@gmail.com">
+  <label>ชื่อ-นามสกุล</label><input name="full_name" value="{{ g.user.full_name }}" required><label>เบอร์โทร</label><input name="phone" value="{{ g.user.phone }}" {{ '' if g.user.is_admin else 'required' }} inputmode="numeric" pattern="[0-9]{9,10}" maxlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')" title="ตัวเลข 9-10 หลักเท่านั้น">
+  <label>ที่อยู่จัดส่ง</label><textarea name="address" rows="3" {{ '' if g.user.is_admin else 'required' }}>{{ g.user.address }}</textarea>
+  <p class="row"><button class="btn ac">บันทึก</button><a class="btn ghost" href="{{ next or url_for('shop.profile') }}">ยกเลิก</a></p></form>
+ {% else %}
+ <dl class="info card" style="padding:22px"><dt>อีเมล</dt><dd>{{ g.user.email }}</dd><dt>เบอร์โทร</dt><dd>{{ g.user.phone or '—' }}</dd><dt>ที่อยู่จัดส่ง</dt><dd>{{ g.user.address or '—' }}</dd></dl>
+ {% endif %}</div>
+{% if edit %}<script>
+(() => {
+  const i = document.getElementById('avatar'), pv = document.getElementById('avprev'), ph = document.getElementById('avph');
+  if (!i) return;
+  i.addEventListener('change', () => {
+    const f = i.files[0]; if (!f) return;
+    if (!f.type.startsWith('image/')) { alert('กรุณาเลือกไฟล์รูปภาพ'); i.value = ''; return; }
+    if (f.size > 16 * 1024 * 1024) { alert('ไฟล์ใหญ่เกิน 16 MB'); i.value = ''; return; }
+    pv.src = URL.createObjectURL(f); pv.hidden = false; if (ph) ph.hidden = true;
+  });
+})();
+</script>{% endif %}{% endblock %}

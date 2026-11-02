@@ -1,0 +1,13 @@
+{% extends "admin/base.html" %}{% block admin %}<h2 class="sec">คำสั่งซื้อ / ตรวจสอบการชำระเงิน</h2>
+<div class="tabs">
+ <a class="{{ 'on' if tab=='pending' }}" href="{{ url_for('admin.orders', status='pending') }}">⏳ รอตรวจสอบ<small>{{ counts.get('pending',0) }}</small></a>
+ <a class="{{ 'on' if tab=='paid' }}" href="{{ url_for('admin.orders', status='paid') }}">✅ อนุมัติแล้ว<small>{{ counts.get('paid',0) }}</small></a>
+ <a class="{{ 'on' if tab=='rejected' }}" href="{{ url_for('admin.orders', status='rejected') }}">❌ ปฏิเสธ<small>{{ counts.get('rejected',0) }}</small></a>
+ <a class="{{ 'on' if tab=='all' }}" href="{{ url_for('admin.orders', status='all') }}">ทั้งหมด<small>{{ counts.get('all',0) }}</small></a>
+</div>
+<div class="tablewrap"><table><tr><th>รหัสระบบ</th><th>ลูกค้า</th><th>วันที่สั่งซื้อ</th><th>สถานะ</th><th>ยอดที่ต้องได้รับ</th><th></th></tr>
+{% for o in rows %}<tr><td>{{ o.id }}</td><td>{{ o.username }} <span class="mut">(คำสั่งซื้อ #{{ o.user_order_no }})</span></td><td>{{ o.created_at|thai_dt }}</td>
+<td><span class="badge-s {{ o.status }}">{{ o.status|status_th }}</span></td><td>฿{{ o.total|money }}</td>
+<td class="row" style="gap:6px"><a class="btn {{ 'ac' if o.status=='pending' else 'ghost' }}" href="{{ url_for('admin.order_detail', oid=o.id) }}">{{ '🔍 ตรวจสลิป' if o.status=='pending' else 'ดูรายละเอียด' }}</a>
+{% if o.status=='paid' %}<a class="btn ghost" href="{{ url_for('shop.receipt', oid=o.id) }}" target="_blank" rel="noopener">🖨 ใบเสร็จ</a>{% endif %}</td></tr>
+{% else %}<tr><td colspan="6" class="mut">{{ 'ไม่มีคำสั่งซื้อที่รอตรวจสอบ 🎉' if tab=='pending' else 'ไม่มีคำสั่งซื้อในหมวดนี้' }}</td></tr>{% endfor %}</table></div>{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "admin/base.html" %}{% block admin %}<h2 class="sec">หมวดหมู่สินค้า</h2>
+<form method="post" class="row" style="margin-bottom:16px"><input name="name" placeholder="ชื่อหมวดหมู่ใหม่ เช่น Kids Watch" style="max-width:320px" required>
+<input name="position" type="number" placeholder="ลำดับ" title="เลขน้อยแสดงก่อน" style="width:90px"><button class="btn ac">เพิ่มหมวดหมู่</button></form>
+<div class="tablewrap"><table><tr><th>ลำดับ</th><th>ชื่อหมวดหมู่ (แก้แล้วกดบันทึกชื่อ)</th><th>จำนวนสินค้า</th><th></th></tr>
+{% for c in rows %}<tr><td>{{ c.position }}</td>
+<td><form method="post" action="{{ url_for('admin.category_rename', cid=c.id) }}" class="row"><input name="name" value="{{ c.name }}" style="max-width:260px" required><button class="btn ghost">บันทึกชื่อ</button></form></td>
+<td>{{ c.n }}</td>
+<td><form method="post" action="{{ url_for('admin.category_delete', cid=c.id) }}" onsubmit="return confirm('ลบหมวดหมู่นี้?')"><button class="btn red" {{ 'disabled' if c.n }}>ลบ</button></form></td></tr>
+{% else %}<tr><td colspan="4" class="mut">ยังไม่มีหมวดหมู่</td></tr>{% endfor %}</table></div>
+<p class="mut">หมวดที่ยังมีสินค้าอยู่ลบไม่ได้ ต้องย้ายหรือลบสินค้าก่อน การเปลี่ยนชื่อหมวดจะย้ายสินค้าในหมวดนั้นตามอัตโนมัติ</p>{% endblock %}
